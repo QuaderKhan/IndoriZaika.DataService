@@ -10,16 +10,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
-COPY ["src/indorizaika-dataservice.csproj", "src/"]
-RUN dotnet restore "src/indorizaika-dataservice.csproj"
+COPY ["src/indorizaikaDataService.csproj", "src/"]
+RUN dotnet restore "src/indorizaikaDataService.csproj"
 COPY . .
 WORKDIR "/src/src"
-RUN dotnet build "indorizaika-dataservice.csproj" -c Release -o /app/build
+RUN dotnet build "indorizaikaDataService.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "indorizaika-dataservice.csproj" -c Release -o /app/publish
+RUN dotnet publish "indorizaikaDataService.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "indorizaika-dataservice.dll"]
+ENTRYPOINT ["dotnet", "indorizaikaDataService.dll"]

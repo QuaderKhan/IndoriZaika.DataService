@@ -1,4 +1,5 @@
-﻿using IndoriZaika.DataService.Models;
+﻿using IndoriZaika.DataService.Entities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,47 +8,49 @@ using System.Threading.Tasks;
 
 namespace IndoriZaika.DataService.Data
 {
-    public class IZDataAccess
+    public class RecipeReposiotry : IRecipe
     {
-        
-        public void Save(Recipe recipe)
+        private readonly IZDBContext _context;
+        public RecipeReposiotry(IZDBContext context)
         {
-            using (var db = new IZDBContext())
+            _context = context;
+        }
+        public async Task<int> Save(Recipe recipe)
+        {
+            using (var db = _context)
             {
                 db.Recipe.Add(recipe);
-                db.SaveChanges();
+                return await db.SaveChangesAsync();
             }
         }
 
-        public Recipe GetRecipe(int Id)
+        public async Task<Recipe> GetRecipe(int Id)
         {
-            using (var db = new IZDBContext())
+            using (var db = _context)
             {
-                return (from r in db.Recipe
-                        where r.Id == Id
-                        select r).FirstOrDefault();
+                return await (from r in db.Recipe
+                              where r.Id == Id
+                              select r).FirstOrDefaultAsync();
             }
         }
 
-        public IList<Recipe> GetRecipes()
+        public async Task<IEnumerable<Recipe>> GetRecipes()
         {
-            using (var db = new IZDBContext())
+            using (var db = _context)
             {
-                return (from r in db.Recipe
-                        select r).ToList<Recipe>();
+                return await (from r in db.Recipe select r).ToListAsync();
             }
-
         }
 
-        public void Update(Recipe recipe)
+        public async Task<int> Update(Recipe recipe)
         {
-            using (var db = new IZDBContext())
+            using (var db = _context)
             {
                 db.Entry(recipe).State = EntityState.Modified;
 
                 try
                 {
-                    db.SaveChanges();
+                    return await db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -60,32 +63,32 @@ namespace IndoriZaika.DataService.Data
                         throw;
                     }
                 }
-            }
-        }
 
-        public bool Delete(int id)
+            }
+
+        }
+        public async Task<ActionResult<int>> Delete(int id)
         {
-            using (var db = new IZDBContext())
+            using (var db = _context)
             {
                 Recipe recipe = db.Recipe.Find(id);
                 if (recipe == null)
                 {
-                    return false;
+                    return 0;
                 }
 
                 db.Recipe.Remove(recipe);
-                db.SaveChanges();
-
-                return true;
+                return await db.SaveChangesAsync();
             }
         }
 
         public bool RecipeExists(int id)
         {
-            using (var db = new IZDBContext())
+            using (var db = _context)
             {
                 return db.Recipe.Count(e => e.Id == id) > 0;
             }
         }
+
     }
 }

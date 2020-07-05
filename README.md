@@ -1,2 +1,2 @@
 # IndoriZaika.DataService
-Containerized Data Service
+Containerized Data Service for Indorizaika
